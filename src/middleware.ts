@@ -1,15 +1,16 @@
-import { authMiddleware } from "@clerk/nextjs";
- 
-export default authMiddleware({
-  
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+//only protect the index page
+const isProtectedRoute = createRouteMatcher(["/"]);
+
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) auth().protect();
 });
 
 export const config = {
   matcher: [
-    // Exclude files with a "." followed by an extension, which are typically static files.
-    // Exclude files in the _next directory, which are Next.js internals.
-    "/((?!.+\\.[\\w]+$|_next).*)",
-    // Re-include any files in the api folders that might have an extension
-    "/(api)(.*)"
-  ]
+    "/((?!.*\\..*|_next).*)", // Don't run middleware on static files
+    "/", // Run middleware on index page
+    "/(api)(.*)",
+  ], // Run middleware on API routes
 };
