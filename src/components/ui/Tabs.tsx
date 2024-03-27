@@ -164,7 +164,6 @@ const Tab = ({ className, label, children }: TabProps) => {
     if (activeTab === label) return;
     setActiveTab(label);
     if (onValueChange) {
-      console.log(label)
       onValueChange(label);
     }
   };
@@ -181,7 +180,7 @@ const Tab = ({ className, label, children }: TabProps) => {
       data-tablabel={label}
       ref={tabRef}
       className={cn(
-        "py-2 px-4 mb-[2px] focus-visible:outline-primary-blue focus-visible:-outline-offset-1 hover:bg-blue-50 mr-1",
+        "p-2 lg:px-4 mb-[2px] focus-visible:outline-primary-blue focus-visible:-outline-offset-1 hover:bg-blue-50 mr-1",
         {
           "border-b-2 border-b-primary-blue font-medium bg-blue-50":
             activeTab === label,

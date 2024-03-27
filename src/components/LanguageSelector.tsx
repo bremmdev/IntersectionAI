@@ -2,49 +2,46 @@
 
 import React from "react";
 import { Tabs } from "./ui/Tabs";
+import type { LanguageName } from "@/context/translation-context";
 
-const availableLanguages = [
-  { code: "en", name: "English" },
-  { code: "nl", name: "Dutch" },
-  { code: "de", name: "German" },
-] as const;
-
-type Language = (typeof availableLanguages)[number];
-type LanguageCode = Language["name"];
+import {
+  availableLanguages,
+  useTranslation,
+} from "@/context/translation-context";
 
 const LanguageSelector = () => {
-  const [selectedLanguage, setSelectedLanguage] = React.useState<
-    LanguageCode | "detect"
-  >("English");
-  const [detectText, setDetectText] = React.useState<string>("Detect language");
+  const { selectedLanguage, setSelectedLanguage, detectedLanguage } =
+    useTranslation();
 
-  const onLanguageChange = (language: string) => {
-    const selectedLanguage = availableLanguages.find(
-      (lang) => lang.name === language
-    )?.name;
-    console.log(selectedLanguage);
-
-    if (!selectedLanguage && language !== "detect") return;
-
-    setSelectedLanguage(selectedLanguage || "detect");
-    //TODO - implement language detection
-    // setDetectText(`${selectedLanguage} - detected`)
+  const onLanguageChange = (value: string) => {
+    const availableLanguageNames = availableLanguages.map((lang) => lang.name);
+    if (
+      value === "Detect" ||
+      availableLanguageNames.includes(value as LanguageName)
+    ) {
+      setSelectedLanguage(value as LanguageName);
+    }
   };
+
+  const detectedLanguageText =
+    detectedLanguage !== "Detect"
+      ? `${detectedLanguage} - detected`
+      : "Detect language";
 
   return (
     <div>
-      <Tabs.Root value={selectedLanguage} onValueChange={onLanguageChange}>
+      <Tabs.Root
+        value={selectedLanguage}
+        onValueChange={(value) => onLanguageChange(value)}
+      >
         <Tabs.List>
-          <Tabs.Tab key="detect" label="detect">
-            {detectText}
-          </Tabs.Tab>
-          <>
-            {availableLanguages.map((language) => (
-              <Tabs.Tab key={language.code} label={language.name}>
-                {language.name}
+          {availableLanguages.map((lang) => {
+            return (
+              <Tabs.Tab key={lang.code} label={lang.name}>
+                {lang.code !== "detect" ? lang.name : detectedLanguageText}
               </Tabs.Tab>
-            ))}
-          </>
+            );
+          })}
         </Tabs.List>
         <></>
       </Tabs.Root>
