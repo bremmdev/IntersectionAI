@@ -14,14 +14,9 @@ import TargetLanguageSelector from "./TargetLanguageSelector";
 import TranslationText from "./TranslationText";
 
 const TranslationForm = () => {
-  const {
-    selectedLanguage,
-    setDetectedLanguage,
-    input,
-    setInput,
-    setTranslatedText,
-    targetLanguage,
-  } = useTranslation();
+  const [translationState, translationDispatch] = useTranslation();
+
+  const { input, selectedLanguage, targetLanguage } = translationState;
 
   const debouncedInput = useDebounce(input, 200);
 
@@ -37,9 +32,12 @@ const TranslationForm = () => {
         fromLanguageCode
       );
 
-      setTranslatedText(translatedData[0].translations[0].text as string);
+      translationDispatch({
+        type: "TRANSLATION_CHANGE",
+        payload: translatedData[0].translations[0].text as string,
+      });
     },
-    [setTranslatedText]
+    [translationDispatch]
   );
 
   const detectLanguageAndTranslate = React.useCallback(async () => {
@@ -55,44 +53,47 @@ const TranslationForm = () => {
         languageNameToCode(targetLanguage as LanguageName) as string
       );
 
-      setDetectedLanguage(detectedLanguage as LanguageName);
+      translationDispatch({
+        type: "DETECTED_LANGUAGE_CHANGE",
+        payload: detectedLanguage as LanguageName,
+      });
     } else {
-      setDetectedLanguage("Detect");
+      translationDispatch({
+        type: "DETECTED_LANGUAGE_CHANGE",
+        payload: "Detect",
+      });
     }
-  }, [debouncedInput, setDetectedLanguage, translateInput, targetLanguage]);
+  }, [debouncedInput, targetLanguage, translateInput, translationDispatch]);
 
-  //only call detection server action if user selects detect tab
+  //when 'detect language' is selected, we want to detect the language and translate
   React.useEffect(() => {
-    if (debouncedInput) {
-      if (selectedLanguage === "Detect") {
-        detectLanguageAndTranslate();
-        return;
-      }
-      if (selectedLanguage) {
-        const selectedLanguageCode = languageNameToCode(selectedLanguage);
-        if (selectedLanguageCode) {
-          translateInput(
-            debouncedInput,
-            languageNameToCode(targetLanguage as LanguageName) as string,
-            selectedLanguageCode
-          );
-        }
+    if (debouncedInput && selectedLanguage === "Detect") {
+      detectLanguageAndTranslate();
+    }
+  }, [debouncedInput, selectedLanguage, detectLanguageAndTranslate]);
+
+  //when a language is selected, we want to translate the input
+  React.useEffect(() => {
+    if (debouncedInput && selectedLanguage !== "Detect") {
+      const selectedLanguageCode = languageNameToCode(selectedLanguage);
+      if (selectedLanguageCode && targetLanguage) {
+        translateInput(
+          debouncedInput,
+          languageNameToCode(targetLanguage as LanguageName) as string,
+          selectedLanguageCode
+        );
       }
     }
-    setDetectedLanguage("Detect");
-    setTranslatedText("");
-  }, [
-    debouncedInput,
-    selectedLanguage,
-    setDetectedLanguage,
-    detectLanguageAndTranslate,
-    translateInput,
-    targetLanguage,
-    setTranslatedText,
-  ]);
+  }, [debouncedInput, selectedLanguage, targetLanguage, translateInput]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+    const value = e.target.value;
+    if (value === "") {
+      translationDispatch({ type: "INPUT_CLEAR" });
+      return;
+    }
+
+    translationDispatch({ type: "INPUT_CHANGE", payload: e.target.value });
   };
 
   return (
@@ -104,6 +105,7 @@ const TranslationForm = () => {
           </h2>
           <LanguageSelector />
           <Textarea
+            aria-label="input text to translate"
             name="input"
             className="min-h-40 focus-visible:ring-primary-blue"
             onChange={handleTextChange}

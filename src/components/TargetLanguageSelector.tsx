@@ -2,21 +2,20 @@ import React from "react";
 
 import { Tabs } from "./ui/Tabs";
 import { useTranslation } from "@/context/translation-context";
-import type { LanguageName } from "@/context/translation-context";
+import type {
+  LanguageName,
+  LanguageNameWithoutDetect,
+} from "@/context/translation-context";
 import { languageNameToCode, languagesWithoutDetect } from "@/lib/utils";
 import { translateText } from "@/_actions/translate";
 
-const languages = languagesWithoutDetect();
-
 const TargetLanguageSelector = () => {
-  const {
-    targetLanguage,
-    setTargetLanguage,
-    selectedLanguage,
-    setTranslatedText,
-    detectedLanguage,
-    input,
-  } = useTranslation();
+  const [translationState, translationDispatch] = useTranslation();
+
+  const { input, selectedLanguage, detectedLanguage, targetLanguage } =
+    translationState;
+
+  const languages = React.useMemo(() => languagesWithoutDetect(), []);
 
   const translateInput = React.useCallback(
     async (
@@ -29,20 +28,24 @@ const TargetLanguageSelector = () => {
         targetLanguage,
         fromLanguageCode
       );
-      setTranslatedText(translatedData[0].translations[0].text as string);
+      translationDispatch({
+        type: "TRANSLATION_CHANGE",
+        payload: translatedData[0].translations[0].text,
+      });
     },
-    [setTranslatedText]
+    [translationDispatch]
   );
 
   const handleLanguageChange = (value: string) => {
-    const newTargetLanguage = value as LanguageName;
-    setTargetLanguage(newTargetLanguage);
+    const newTargetLanguage = value as LanguageNameWithoutDetect;
+    translationDispatch({
+      type: "TARGET_LANGUAGE_CHANGE",
+      payload: newTargetLanguage,
+    });
     let selectedLanguageCode: string | undefined = "";
 
     if (selectedLanguage === "Detect") {
-      selectedLanguageCode = languageNameToCode(
-        detectedLanguage as LanguageName
-      );
+      selectedLanguageCode = languageNameToCode(detectedLanguage);
     } else {
       selectedLanguageCode = languageNameToCode(selectedLanguage);
     }

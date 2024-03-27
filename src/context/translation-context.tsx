@@ -11,79 +11,87 @@ export const availableLanguages = [
 
 export type Language = (typeof availableLanguages)[number];
 export type LanguageName = Language["name"];
+export type LanguageNameWithoutDetect = Exclude<LanguageName, "Detect">;
 
-export type TranslationCtx = {
+export type TranslationState = {
   input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
-  //holds the language that the user selected manually
   selectedLanguage: LanguageName;
-  setSelectedLanguage: React.Dispatch<React.SetStateAction<LanguageName>>;
-  //holds the language that the system detected if the user selected detect
   detectedLanguage: LanguageName;
-  setDetectedLanguage: React.Dispatch<React.SetStateAction<LanguageName>>;
-  targetLanguage: Omit<LanguageName, "Detect">;
-  setTargetLanguage: React.Dispatch<
-    React.SetStateAction<Omit<LanguageName, "Detect">>
-  >;
+  targetLanguage: LanguageNameWithoutDetect;
   translatedText: string;
-  setTranslatedText: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const TranslationContext = React.createContext({
+export type TranslationAction =
+  | { type: "INPUT_CHANGE"; payload: string }
+  | { type: "SELECTED_LANGUAGE_CHANGE"; payload: LanguageName }
+  | { type: "DETECTED_LANGUAGE_CHANGE"; payload: LanguageName }
+  | { type: "TARGET_LANGUAGE_CHANGE"; payload: LanguageNameWithoutDetect }
+  | { type: "TRANSLATION_CHANGE"; payload: string }
+  | { type: "INPUT_CLEAR" };
+
+const initialState: TranslationState = {
   input: "",
-  setInput: (input: string) => {},
-  detectedLanguage: "Detect",
-  setDetectedLanguage: (language: LanguageName) => {},
   selectedLanguage: "Detect",
-  setSelectedLanguage: (selectedLanguage: LanguageName) => {},
-  targetLanguage: "English" as Omit<LanguageName, "Detect">,
-  setTargetLanguage: (targetLanguage: Omit<LanguageName, "Detect">) => {},
+  detectedLanguage: "Detect",
+  targetLanguage: "English",
   translatedText: "",
-  setTranslatedText: (translatedText: string) => {},  
-});
+};
+
+function translationReducer(
+  state: TranslationState,
+  action: TranslationAction
+): TranslationState {
+  switch (action.type) {
+    case "INPUT_CHANGE":
+      return { ...state, input: action.payload };
+    case "SELECTED_LANGUAGE_CHANGE":
+      return {
+        ...state,
+        selectedLanguage: action.payload,
+        detectedLanguage: "Detect",
+      };
+    case "DETECTED_LANGUAGE_CHANGE":
+      return { ...state, detectedLanguage: action.payload };
+    case "TARGET_LANGUAGE_CHANGE":
+      return { ...state, targetLanguage: action.payload };
+    case "TRANSLATION_CHANGE":
+      return { ...state, translatedText: action.payload };
+    case "INPUT_CLEAR":
+      return {
+        ...state,
+        input: "",
+        translatedText: "",
+        detectedLanguage: "Detect",
+      };
+    default:
+      return state;
+  }
+}
+
+const TranslationContext = React.createContext<
+  [TranslationState, React.Dispatch<TranslationAction>] | undefined
+>(undefined);
 
 export const TranslationProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [input, setInput] = React.useState<string>("");
-  const [detectedLanguage, setDetectedLanguage] =
-    React.useState<LanguageName>("Detect");
-  const [selectedLanguage, setSelectedLanguage] =
-    React.useState<LanguageName>("Detect");
-  const [targetLanguage, setTargetLanguage] =
-    React.useState<Omit<LanguageName, "Detect">>("English");
-    const [translatedText, setTranslatedText] = React.useState<string>("");
+  const [state, dispatch] = React.useReducer(translationReducer, initialState);
 
   return (
-    <TranslationContext.Provider
-      value={{
-        input,
-        setInput,
-        detectedLanguage,
-        setDetectedLanguage,
-        selectedLanguage,
-        setSelectedLanguage,
-        targetLanguage,
-        setTargetLanguage,
-        translatedText,
-        setTranslatedText,
-      }}
-    >
+    <TranslationContext.Provider value={[state, dispatch]}>
       {children}
     </TranslationContext.Provider>
   );
 };
 
-export default TranslationProvider;
-
 export const useTranslation = () => {
-  const ctx = React.useContext(TranslationContext);
+  const context = React.useContext(TranslationContext);
 
-  if (!ctx) {
+  if (!context) {
     throw new Error("useTranslation must be used within a TranslationProvider");
   }
 
-  return ctx;
+  return context;
 };

@@ -173,7 +173,6 @@ const Tab = ({ className, label, children }: TabProps) => {
       role="tab"
       type="button"
       id={`tab-${label}`}
-      aria-controls={`panel-${label}`}
       aria-selected={activeTab === label}
       tabIndex={activeTab === label ? 0 : -1}
       onClick={handleOnClick}

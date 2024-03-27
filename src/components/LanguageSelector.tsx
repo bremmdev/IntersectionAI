@@ -10,8 +10,9 @@ import {
 } from "@/context/translation-context";
 
 const LanguageSelector = () => {
-  const { selectedLanguage, setSelectedLanguage, detectedLanguage } =
-    useTranslation();
+  const [translationState, translationDispatch] = useTranslation();
+
+  const { detectedLanguage, selectedLanguage } = translationState;
 
   const onLanguageChange = (value: string) => {
     const availableLanguageNames = availableLanguages.map((lang) => lang.name);
@@ -19,7 +20,10 @@ const LanguageSelector = () => {
       value === "Detect" ||
       availableLanguageNames.includes(value as LanguageName)
     ) {
-      setSelectedLanguage(value as LanguageName);
+      translationDispatch({
+        type: "SELECTED_LANGUAGE_CHANGE",
+        payload: value as LanguageName,
+      });
     }
   };
 
