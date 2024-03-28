@@ -3,9 +3,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 //only protect the index page
 const isProtectedRoute = createRouteMatcher(["/"]);
 
-export default clerkMiddleware((auth, req) => {
-  // if (isProtectedRoute(req)) auth().protect();
-});
+export default clerkMiddleware((auth, req) => {});
 
 export const config = {
   matcher: [
