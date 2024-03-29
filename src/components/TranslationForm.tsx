@@ -97,7 +97,6 @@ const TranslationForm = () => {
   //when 'detect language' is selected, we want to detect the language and translate
   React.useEffect(() => {
     if (debouncedInput && selectedLanguage === "Detect") {
-      console.log('y')
       detectLanguageAndTranslate();
     }
   }, [
@@ -110,7 +109,6 @@ const TranslationForm = () => {
   //when a language is selected, we want to translate the input
   React.useEffect(() => {
     if (debouncedInput && selectedLanguage !== "Detect") {
-      console.log('x')
       const selectedLanguageCode = languageNameToCode(selectedLanguage);
       const targetLanguageCode = languageNameToCode(
         targetLanguage as TargetLanguageName
