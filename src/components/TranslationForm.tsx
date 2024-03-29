@@ -6,8 +6,11 @@ import LanguageSelector from "./LanguageSelector";
 import { useDebounce } from "@/hooks/useDebounce";
 import { detectLanguage } from "@/_actions/translate";
 import { useTranslation } from "@/context/translation-context";
-import { availableLanguages } from "@/context/translation-context";
-import type { LanguageName } from "@/context/translation-context";
+import { availableLanguages, availableTargetLanguages } from "@/context/translation-context";
+import type {
+  LanguageName,
+  TargetLanguageName,
+} from "@/context/translation-context";
 import { translateText } from "@/_actions/translate";
 import { codeToLanguageName, languageNameToCode } from "@/lib/utils";
 import TargetLanguageSelector from "./TargetLanguageSelector";
@@ -26,6 +29,9 @@ const TranslationForm = () => {
       targetLanguage: string,
       fromLanguageCode?: string
     ) => {
+      translationDispatch({ type: "TRANSLATION_START" });
+      console.log('translating')
+
       const translatedData = await translateText(
         debouncedInput,
         targetLanguage,
@@ -33,8 +39,8 @@ const TranslationForm = () => {
       );
 
       translationDispatch({
-        type: "TRANSLATION_CHANGE",
-        payload: translatedData[0].translations[0].text as string,
+        type: "TRANSLATION_DONE",
+        payload: translatedData,
       });
     },
     [translationDispatch]
@@ -43,6 +49,30 @@ const TranslationForm = () => {
   const detectLanguageAndTranslate = React.useCallback(async () => {
     const data = await detectLanguage(debouncedInput);
 
+    //don't translate on error
+    if ("error" in data) {
+      translationDispatch({
+        type: "DETECTION_ERROR",
+        payload: data.error.message,
+      });
+      return;
+    }
+
+    //only support English, Dutch and German
+    const supportedLanguages =  availableTargetLanguages.map(language => language.code) as string[];
+    const detectedLanguageByService = data[0]?.language
+    if (!supportedLanguages.includes(detectedLanguageByService)) {
+      translationDispatch({
+        type: "DETECTION_ERROR",
+        payload: {
+          message: `Detected language '${detectedLanguageByService}' is not supported. Please try again.`,
+        },
+      });
+      return;
+    }
+
+    //no error and supported language, so translate
+
     //set detected language only if it is one of the available languages
     const availableLanguageCode = availableLanguages.map((lang) => lang.code);
     if (availableLanguageCode.includes(data[0].language)) {
@@ -50,7 +80,7 @@ const TranslationForm = () => {
 
       translateInput(
         debouncedInput,
-        languageNameToCode(targetLanguage as LanguageName) as string
+        languageNameToCode(targetLanguage as TargetLanguageName) as string
       );
 
       translationDispatch({
@@ -70,16 +100,24 @@ const TranslationForm = () => {
     if (debouncedInput && selectedLanguage === "Detect") {
       detectLanguageAndTranslate();
     }
-  }, [debouncedInput, selectedLanguage, detectLanguageAndTranslate]);
+  }, [
+    debouncedInput,
+    selectedLanguage,
+    detectLanguageAndTranslate,
+    targetLanguage,
+  ]);
 
   //when a language is selected, we want to translate the input
   React.useEffect(() => {
     if (debouncedInput && selectedLanguage !== "Detect") {
       const selectedLanguageCode = languageNameToCode(selectedLanguage);
+      const targetLanguageCode = languageNameToCode(
+        targetLanguage as TargetLanguageName
+      );
       if (selectedLanguageCode && targetLanguage) {
         translateInput(
           debouncedInput,
-          languageNameToCode(targetLanguage as LanguageName) as string,
+          targetLanguageCode as string,
           selectedLanguageCode
         );
       }

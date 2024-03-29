@@ -14,7 +14,7 @@ const LanguageSelector = () => {
 
   const { detectedLanguage, selectedLanguage } = translationState;
 
-  const onLanguageChange = (value: string) => {
+  const handleLanguageChange = (value: string) => {
     const availableLanguageNames = availableLanguages.map((lang) => lang.name);
     if (
       value === "Detect" ||
@@ -36,7 +36,7 @@ const LanguageSelector = () => {
     <div>
       <Tabs.Root
         value={selectedLanguage}
-        onValueChange={(value) => onLanguageChange(value)}
+        onValueChange={(value) => handleLanguageChange(value)}
       >
         <Tabs.List>
           {availableLanguages.map((lang) => {

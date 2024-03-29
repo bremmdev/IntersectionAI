@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  TranslateSuccessResponse,
+  TranslateResponse,
+} from "@/_actions/translate";
 import React from "react";
 
 export const availableLanguages = [
@@ -9,24 +13,37 @@ export const availableLanguages = [
   { code: "de", name: "German" },
 ] as const;
 
+export const availableTargetLanguages = [
+  { code: "en", name: "English" },
+  { code: "nl", name: "Dutch" },
+  { code: "de", name: "German" },
+] as const;
+
 export type Language = (typeof availableLanguages)[number];
+export type TargetLanguage = (typeof availableTargetLanguages)[number];
 export type LanguageName = Language["name"];
-export type LanguageNameWithoutDetect = Exclude<LanguageName, "Detect">;
+export type TargetLanguageName = TargetLanguage["name"];
+
+export type STATUS = "idle" | "loading" | "success" | "error";
 
 export type TranslationState = {
   input: string;
   selectedLanguage: LanguageName;
   detectedLanguage: LanguageName;
-  targetLanguage: LanguageNameWithoutDetect;
+  targetLanguage: TargetLanguageName;
   translatedText: string;
+  status: STATUS;
+  errorMessage: string;
 };
 
 export type TranslationAction =
   | { type: "INPUT_CHANGE"; payload: string }
   | { type: "SELECTED_LANGUAGE_CHANGE"; payload: LanguageName }
   | { type: "DETECTED_LANGUAGE_CHANGE"; payload: LanguageName }
-  | { type: "TARGET_LANGUAGE_CHANGE"; payload: LanguageNameWithoutDetect }
-  | { type: "TRANSLATION_CHANGE"; payload: string }
+  | { type: "DETECTION_ERROR"; payload: { message: string } }
+  | { type: "TARGET_LANGUAGE_CHANGE"; payload: TargetLanguageName }
+  | { type: "TRANSLATION_START" }
+  | { type: "TRANSLATION_DONE"; payload: TranslateResponse }
   | { type: "INPUT_CLEAR" };
 
 const initialState: TranslationState = {
@@ -35,6 +52,8 @@ const initialState: TranslationState = {
   detectedLanguage: "Detect",
   targetLanguage: "English",
   translatedText: "",
+  status: "idle",
+  errorMessage: "",
 };
 
 function translationReducer(
@@ -52,16 +71,38 @@ function translationReducer(
       };
     case "DETECTED_LANGUAGE_CHANGE":
       return { ...state, detectedLanguage: action.payload };
+    case "DETECTION_ERROR":
+      return {
+        ...state,
+        detectedLanguage: "Detect",
+        errorMessage: action.payload.message,
+        status: "error",
+        translatedText: "",
+      };
     case "TARGET_LANGUAGE_CHANGE":
       return { ...state, targetLanguage: action.payload };
-    case "TRANSLATION_CHANGE":
-      return { ...state, translatedText: action.payload };
+    case "TRANSLATION_START":
+      return { ...state, status: "loading", errorMessage: "" };
+    case "TRANSLATION_DONE":
+      if ("error" in action.payload) {
+        return {
+          ...state,
+          translatedText: "",
+          status: "error",
+          errorMessage: action.payload.error.message,
+        };
+      }
+      const translatedText = (action.payload as TranslateSuccessResponse)[0]
+        .translations[0].text;
+      return { ...state, translatedText, status: "success", errorMessage: "" };
     case "INPUT_CLEAR":
       return {
         ...state,
         input: "",
         translatedText: "",
         detectedLanguage: "Detect",
+        errorMessage: "",
+        status: "idle",
       };
     default:
       return state;
