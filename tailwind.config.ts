@@ -68,10 +68,15 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "flicker": {
+          "0%, 100%": { background: "#eeeeee"},
+          "50%": { background: "#f9f9f9"},
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        flicker: "flicker 0.2s infinite",
       },
     },
   },
