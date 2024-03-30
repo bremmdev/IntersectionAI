@@ -26,6 +26,8 @@ export type TargetLanguageName = TargetLanguage["name"];
 
 export type STATUS = "idle" | "loading" | "success" | "error";
 
+type RecordingStatus = "idle" | "recording" | "stopped";
+
 export type TranslationState = {
   input: string;
   selectedLanguage: LanguageName;
@@ -34,6 +36,7 @@ export type TranslationState = {
   translatedText: string;
   status: STATUS;
   errorMessage: string;
+  recordingStatus: RecordingStatus;
 };
 
 export type TranslationAction =
@@ -44,7 +47,9 @@ export type TranslationAction =
   | { type: "TARGET_LANGUAGE_CHANGE"; payload: TargetLanguageName }
   | { type: "TRANSLATION_START" }
   | { type: "TRANSLATION_DONE"; payload: TranslateResponse }
-  | { type: "INPUT_CLEAR" };
+  | { type: "INPUT_CLEAR" }
+  | { type: "RECORDING_START" }
+  | { type: "RECORDING_STOP" };
 
 const initialState: TranslationState = {
   input: "",
@@ -54,6 +59,7 @@ const initialState: TranslationState = {
   translatedText: "",
   status: "idle",
   errorMessage: "",
+  recordingStatus: "idle",
 };
 
 function translationReducer(
@@ -104,6 +110,17 @@ function translationReducer(
         errorMessage: "",
         status: "idle",
       };
+    case "RECORDING_START":
+      return {
+        ...state,
+        recordingStatus: "recording",
+        errorMessage: "",
+        translatedText: "",
+        status: "idle",
+        input: "",
+      };
+    case "RECORDING_STOP":
+      return { ...state, recordingStatus: "stopped" };
     default:
       return state;
   }

@@ -6,7 +6,10 @@ import LanguageSelector from "./LanguageSelector";
 import { useDebounce } from "@/hooks/useDebounce";
 import { detectLanguage } from "@/_actions/translate";
 import { useTranslation } from "@/context/translation-context";
-import { availableLanguages, availableTargetLanguages } from "@/context/translation-context";
+import {
+  availableLanguages,
+  availableTargetLanguages,
+} from "@/context/translation-context";
 import type {
   LanguageName,
   TargetLanguageName,
@@ -15,11 +18,13 @@ import { translateText } from "@/_actions/translate";
 import { codeToLanguageName, languageNameToCode } from "@/lib/utils";
 import TargetLanguageSelector from "./TargetLanguageSelector";
 import TranslationText from "./TranslationText";
+import SpeechRecorder from "./SpeechRecorder";
 
 const TranslationForm = () => {
   const [translationState, translationDispatch] = useTranslation();
 
-  const { input, selectedLanguage, targetLanguage } = translationState;
+  const { input, selectedLanguage, targetLanguage, recordingStatus } =
+    translationState;
 
   const debouncedInput = useDebounce(input, 200);
 
@@ -58,8 +63,10 @@ const TranslationForm = () => {
     }
 
     //only support English, Dutch and German
-    const supportedLanguages =  availableTargetLanguages.map(language => language.code) as string[];
-    const detectedLanguageByService = data[0]?.language
+    const supportedLanguages = availableTargetLanguages.map(
+      (language) => language.code
+    ) as string[];
+    const detectedLanguageByService = data[0]?.language;
     if (!supportedLanguages.includes(detectedLanguageByService)) {
       translationDispatch({
         type: "DETECTION_ERROR",
@@ -136,18 +143,23 @@ const TranslationForm = () => {
   return (
     <div className="flex flex-col md:flex-row gap-8">
       <div className="basis-1/2">
-        <form className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <h2 className="text-lg text-primary-blue font-medium">
             Translate from
           </h2>
           <LanguageSelector />
-          <Textarea
-            aria-label="input text to translate"
-            name="input"
-            className="min-h-40 focus-visible:ring-primary-blue"
-            onChange={handleTextChange}
-          />
-        </form>
+          <div className="textarea-wrapper relative border border-input rounded-lg">
+            <Textarea
+              aria-label="input text to translate"
+              name="input"
+              className="relative min-h-28 focus-visible:outline-none focus:outline-none disabled:cursor-not-allowed"
+              value={input}
+              disabled={recordingStatus === "recording"}
+              onChange={handleTextChange}
+            />
+            <SpeechRecorder />
+          </div>
+        </div>
       </div>
       <div className="basis-1/2 flex flex-col gap-4">
         <h2 className="text-lg text-primary-blue font-medium">Translate to</h2>
