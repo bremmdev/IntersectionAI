@@ -38,7 +38,7 @@ const LanguageSelector = () => {
         value={selectedLanguage}
         onValueChange={(value) => handleLanguageChange(value)}
       >
-        <Tabs.List>
+        <Tabs.List aria-label="translation language selector">
           {availableLanguages.map((lang) => {
             return (
               <Tabs.Tab key={lang.code} label={lang.name}>

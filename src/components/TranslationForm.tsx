@@ -19,8 +19,10 @@ import { codeToLanguageName, languageNameToCode } from "@/lib/utils";
 import TargetLanguageSelector from "./TargetLanguageSelector";
 import TranslationText from "./TranslationText";
 import SpeechRecorder from "./SpeechRecorder";
+import { X as DeleteTextIcon } from "lucide-react";
 
 const TranslationForm = () => {
+  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const [translationState, translationDispatch] = useTranslation();
 
   const { input, selectedLanguage, targetLanguage, recordingStatus } =
@@ -140,6 +142,11 @@ const TranslationForm = () => {
     translationDispatch({ type: "INPUT_CHANGE", payload: e.target.value });
   };
 
+  const handleClearInput = () => {
+    translationDispatch({ type: "INPUT_CLEAR" });
+    textAreaRef.current?.focus();
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-8">
       <div className="basis-1/2">
@@ -152,11 +159,26 @@ const TranslationForm = () => {
             <Textarea
               aria-label="input text to translate"
               name="input"
-              className="relative min-h-28 focus-visible:outline-none focus:outline-none disabled:cursor-not-allowed"
+              className="relative min-h-28 focus-visible:outline-none focus:outline-none disabled:cursor-not-allowed pr-10"
+              autoFocus
+              ref={textAreaRef}
               value={input}
               disabled={recordingStatus === "recording"}
               onChange={handleTextChange}
             />
+            {input.length > 0 && (
+              <button
+                className="absolute top-1 right-1"
+                onClick={handleClearInput}
+                aria-label="clear input text"
+              >
+                <DeleteTextIcon
+                  size={32}
+                  className="stroke-slate-600 cursor-pointer hover:bg-slate-100 rounded-full p-1"
+                  aria-hidden
+                />
+              </button>
+            )}
             <SpeechRecorder />
           </div>
         </div>
