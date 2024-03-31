@@ -6,8 +6,8 @@ import { Button } from "./ui/button";
 import { transcribe } from "@/_actions/translate";
 import { getWaveBlob } from "@/lib/webmtowav";
 import { useTranslation } from "@/context/translation-context";
-
-type RecordingStatus = "idle" | "recording" | "stopped";
+import { toast } from "sonner";
+import { useMounted } from "@/hooks/useMounted";
 
 const SpeechRecorder = () => {
   const [permission, setPermission] = React.useState<boolean | undefined>(
@@ -16,18 +16,16 @@ const SpeechRecorder = () => {
 
   const [translationState, translationDispatch] = useTranslation();
 
+  const mounted = useMounted();
+
   const { selectedLanguage, recordingStatus } = translationState;
 
   const [stream, setStream] = React.useState<MediaStream | null>(null);
   const mediaRecorder = React.useRef<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = React.useState<Array<Blob>>([]);
 
-  //get microphone permission on mount
-  React.useEffect(() => {
-    getMicrophonePermission();
-  }, []);
-
-  async function getMicrophonePermission() {
+  const getMicrophonePermission = React.useCallback(async () => {
+    if (!mounted) return;
     if (!("MediaDevices" in window)) return;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -36,13 +34,36 @@ const SpeechRecorder = () => {
       });
       setPermission(true);
       setStream(stream);
+      toast.success("Microphone enabled");
     } catch (err) {
       setPermission(false);
+      toast.warning(
+        "Microphone permission denied. Please enable it in settings and press the button again."
+      );
     }
-  }
+  }, [mounted, setPermission]);
+
+  //get microphone permission on mount
+  React.useEffect(() => {
+    getMicrophonePermission();
+  }, [getMicrophonePermission]);
 
   async function startRecording() {
     if (!mediaRecorder || stream === null) return;
+
+    //handle the case where the user disables the microphone permission in settings after first enabling it
+    const permissionName = "microphone" as PermissionName;
+    const micPermission = await navigator.permissions.query({
+      name: permissionName,
+    });
+    if (micPermission.state === "denied") {
+      setPermission(false);
+      toast.warning(
+        "Microphone permission denied. Please enable it in settings."
+      );
+
+      return;
+    }
 
     translationDispatch({ type: "RECORDING_START" });
 
@@ -81,9 +102,19 @@ const SpeechRecorder = () => {
       const formData = new FormData();
       formData.append("audio", file);
       formData.append("language", selectedLanguage);
-      const data = await transcribe(formData);
+      try {
+        const data = await transcribe(formData);
 
-      translationDispatch({ type: "INPUT_CHANGE", payload: data.DisplayText });
+        if (typeof data !== "object" || data?.RecognitionStatus !== "Success")
+          return toast.error("Error transcribing audio");
+
+        translationDispatch({
+          type: "INPUT_CHANGE",
+          payload: data.DisplayText,
+        });
+      } catch (err) {
+        toast.error("Error transcribing audio");
+      }
 
       setAudioChunks([]);
     };
@@ -103,7 +134,11 @@ const SpeechRecorder = () => {
         <span className="inline-block animate-spin delay-100 w-5 h-5 ml-2 mt-2 rounded-full border-2 border-slate-300 border-t-slate-600"></span>
       )}
       {showPermissionButton && (
-        <Button className="h-9" onClick={getMicrophonePermission}>
+        <Button
+          className="h-9"
+          variant="outline"
+          onClick={getMicrophonePermission}
+        >
           Enable mic
         </Button>
       )}

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import { TranslationProvider } from "@/context/translation-context";
+import { Toaster } from "@/components/ui/sonner"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,8 +24,10 @@ export default function RootLayout({
         <html lang="en">
           <body className={`${inter.className} text-sm`}>
             <Header />
-
-            <main className="max-w-7xl w-11/12 mx-auto py-12 pt-8">{children}</main>
+            <main className="max-w-7xl w-11/12 mx-auto py-12 pt-8">
+              {children}
+            </main>
+            <Toaster richColors closeButton/>
           </body>
         </html>
       </TranslationProvider>
