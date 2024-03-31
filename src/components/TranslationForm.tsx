@@ -156,6 +156,9 @@ const TranslationForm = () => {
           </h2>
           <LanguageSelector />
           <div className="textarea-wrapper relative border border-input rounded-lg">
+            {translationState.recordingStatus === "stopped" && (
+              <span className="translation-loader absolute z-10 top-2 left-4 text-slate-600">Translating speech...</span>
+            )}
             <Textarea
               aria-label="input text to translate"
               name="input"
@@ -163,12 +166,12 @@ const TranslationForm = () => {
               autoFocus
               ref={textAreaRef}
               value={input}
-              disabled={recordingStatus === "recording"}
+              disabled={recordingStatus === "recording" || recordingStatus === "stopped"}
               onChange={handleTextChange}
             />
             {input.length > 0 && (
               <button
-                className="absolute top-1 right-1"
+                className="absolute top-1 right-4"
                 onClick={handleClearInput}
                 aria-label="clear input text"
               >

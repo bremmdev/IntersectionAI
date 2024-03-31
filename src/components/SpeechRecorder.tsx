@@ -9,6 +9,8 @@ import { useTranslation } from "@/context/translation-context";
 import { toast } from "sonner";
 import { useMounted } from "@/hooks/useMounted";
 
+const TOTAL_RECORDING_TIME = 30;
+
 const SpeechRecorder = () => {
   const [permission, setPermission] = React.useState<boolean | undefined>(
     undefined
@@ -23,6 +25,9 @@ const SpeechRecorder = () => {
   const [stream, setStream] = React.useState<MediaStream | null>(null);
   const mediaRecorder = React.useRef<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = React.useState<Array<Blob>>([]);
+  const [timeRemaining, setTimeRemaining] =
+    React.useState<number>(TOTAL_RECORDING_TIME);
+  const timerRef = React.useRef<number | null>(null);
 
   const getMicrophonePermission = React.useCallback(async () => {
     if (!mounted) return;
@@ -43,11 +48,6 @@ const SpeechRecorder = () => {
     }
   }, [mounted, setPermission]);
 
-  //get microphone permission on mount
-  React.useEffect(() => {
-    getMicrophonePermission();
-  }, [getMicrophonePermission]);
-
   async function startRecording() {
     if (!mediaRecorder || stream === null) return;
 
@@ -67,6 +67,10 @@ const SpeechRecorder = () => {
 
     translationDispatch({ type: "RECORDING_START" });
 
+    timerRef.current = window.setInterval(() => {
+      setTimeRemaining((prev) => prev - 1);
+    }, 1000);
+
     //create new Media recorder instance using the stream
     const media = new MediaRecorder(stream);
     //set the MediaRecorder instance to the mediaRecorder ref
@@ -82,7 +86,7 @@ const SpeechRecorder = () => {
     setAudioChunks(localAudioChunks);
   }
 
-  async function stopRecording() {
+  const stopRecording = React.useCallback(async () => {
     if (!mediaRecorder.current) return;
 
     translationDispatch({ type: "RECORDING_STOP" });
@@ -113,20 +117,36 @@ const SpeechRecorder = () => {
           payload: data.DisplayText,
         });
       } catch (err) {
+        translationDispatch({ type: "RECORDING_RESET" });
         toast.error("Error transcribing audio");
+      } finally {
+        setAudioChunks([]);
+        clearInterval(timerRef.current as number);
+        setTimeRemaining(TOTAL_RECORDING_TIME);
+        translationDispatch({ type: "RECORDING_RESET" });
       }
-
-      setAudioChunks([]);
     };
-  }
+  }, [audioChunks, selectedLanguage, translationDispatch]);
+
+  //get microphone permission on mount
+  React.useEffect(() => {
+    getMicrophonePermission();
+  }, [getMicrophonePermission]);
+
+  React.useEffect(() => {
+    if (timeRemaining === 0) {
+      stopRecording();
+    }
+  }, [timeRemaining, stopRecording]);
 
   const showPermissionButton =
     permission == false && recordingStatus === "idle";
   const showMicButton =
     permission &&
     recordingStatus !== "recording" &&
-    selectedLanguage !== "Detect";
-  const showMicStopButton = permission && recordingStatus === "recording";
+    selectedLanguage !== "Detect" &&
+    recordingStatus === "idle";
+  const isRecording = permission && recordingStatus === "recording";
 
   return (
     <div className="h-8 my-2 ml-2">
@@ -154,14 +174,17 @@ const SpeechRecorder = () => {
           />
         </button>
       )}
-      {showMicStopButton && (
-        <button onClick={stopRecording} aria-label="stop recording audio">
-          <StopCircle
-            size={32}
-            className="stroke-rose-600 cursor-pointer hover:bg-slate-100 rounded-full p-1"
-            aria-hidden
-          />
-        </button>
+      {isRecording && (
+        <div className="flex gap-2 items-center">
+          <button onClick={stopRecording} aria-label="stop recording audio">
+            <StopCircle
+              size={32}
+              className="stroke-rose-600 cursor-pointer hover:bg-slate-100 rounded-full p-1"
+              aria-hidden
+            />
+          </button>
+          <span>00 : {timeRemaining.toString().padStart(2, "0")}</span>
+        </div>
       )}
     </div>
   );

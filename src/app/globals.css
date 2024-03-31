@@ -87,6 +87,23 @@
   @apply absolute left-4 top-2 text-slate-600 z-10 hidden;
   content: "Recording...";
 }
-.textarea-wrapper:has(textarea:disabled)::before {
+
+/* Show the recording indicator when the textarea is disabled, but not when it it translating */
+.textarea-wrapper:has(textarea:disabled):not(
+    :has(.translation-loader)
+  )::before {
   @apply block;
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+  width: 0.5em;
+  height: 0.5em;
+}
+
+/* firefox */
+@supports (scrollbar-color: #1560fb #93c5fd) {
+  * {
+    scrollbar-width: thin;
+  }
 }

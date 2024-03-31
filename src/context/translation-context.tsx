@@ -49,7 +49,8 @@ export type TranslationAction =
   | { type: "TRANSLATION_DONE"; payload: TranslateResponse }
   | { type: "INPUT_CLEAR" }
   | { type: "RECORDING_START" }
-  | { type: "RECORDING_STOP" };
+  | { type: "RECORDING_STOP" }
+  | { type: "RECORDING_RESET" };
 
 const initialState: TranslationState = {
   input: "",
@@ -121,6 +122,8 @@ function translationReducer(
       };
     case "RECORDING_STOP":
       return { ...state, recordingStatus: "stopped" };
+    case  "RECORDING_RESET":
+      return { ...state, recordingStatus: "idle" };
     default:
       return state;
   }
