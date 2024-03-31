@@ -1,4 +1,10 @@
-import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import {
+  UserButton,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  ClerkLoading,
+} from "@clerk/nextjs";
 import React from "react";
 import { Button } from "./ui/button";
 import Image from "next/image";
@@ -18,7 +24,7 @@ const userButtonAppearance = {
 
 const Header = () => {
   return (
-    <header className="flex justify-between items-center p-4 sm:px-8 border-b border-slate-300 bg-slate-50">
+    <header className="flex justify-between items-center h-20 sm:px-8 border-b border-slate-300 bg-slate-50">
       <div className="flex gap-2 items-center">
         <Image
           src="/logo.svg"
@@ -30,6 +36,9 @@ const Header = () => {
           Intersection<span className="text-primary-blue">AI</span>
         </h1>
       </div>
+      <ClerkLoading>
+        <span className="animate-spin delay-100 w-6 h-6 mr-1 rounded-full border-2 border-slate-300 border-t-slate-600"></span>
+      </ClerkLoading>
 
       <SignedIn>
         <UserButton appearance={userButtonAppearance} />
