@@ -1,13 +1,18 @@
 "use client";
 
 import React from "react";
-import { Mic, StopCircle } from "lucide-react";
+import { Mic, MicOff, StopCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { transcribe } from "@/_actions/translate";
 import { getWaveBlob } from "@/lib/webmtowav";
 import { useTranslation } from "@/context/translation-context";
 import { toast } from "sonner";
 import { useMounted } from "@/hooks/useMounted";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const TOTAL_RECORDING_TIME = 30;
 
@@ -146,12 +151,24 @@ const SpeechRecorder = () => {
     recordingStatus !== "recording" &&
     selectedLanguage !== "auto" &&
     recordingStatus === "idle";
+  const showMicOff =
+    permission && recordingStatus === "idle" && selectedLanguage === "auto";
   const isRecording = permission && recordingStatus === "recording";
 
   return (
-    <div className="h-8 my-2 ml-2">
+    <div className="h-12 -mt-3 flex items-center rounded-lg">
+      {showMicOff && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <MicOff size={24} className="stroke-slate-400 ml-1" aria-hidden />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Select a language to enable voice translation</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
       {permission === undefined && (
-        <span className="inline-block animate-spin delay-100 w-5 h-5 ml-2 mt-2 rounded-full border-2 border-slate-300 border-t-slate-600"></span>
+        <span className="inline-block ml-1 animate-spin delay-100 w-5 h-5 rounded-full border-2 border-slate-300 border-t-slate-600"></span>
       )}
       {showPermissionButton && (
         <Button
@@ -163,16 +180,23 @@ const SpeechRecorder = () => {
         </Button>
       )}
       {showMicButton && (
-        <button
-          onClick={startRecording}
-          aria-label="record audio from microphone"
-        >
-          <Mic
-            size={32}
-            className="stroke-primary-blue cursor-pointer hover:bg-slate-100 rounded-full p-1"
-            aria-hidden
-          />
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={startRecording}
+              aria-label="record audio from microphone"
+            >
+              <Mic
+                size={32}
+                className="stroke-primary-blue cursor-pointer hover:bg-slate-100 rounded-full p-1"
+                aria-hidden
+              />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Start recording voice</p>
+          </TooltipContent>
+        </Tooltip>
       )}
       {isRecording && (
         <div className="flex gap-2 items-center">

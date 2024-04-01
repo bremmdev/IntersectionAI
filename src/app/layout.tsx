@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import { TranslationProvider } from "@/context/translation-context";
 import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <TranslationProvider>
+        <TooltipProvider>
         <html lang="en">
           <body className={`${inter.className} text-sm`}>
             <Header />
@@ -30,6 +32,7 @@ export default function RootLayout({
             <Toaster richColors closeButton/>
           </body>
         </html>
+        </TooltipProvider>
       </TranslationProvider>
     </ClerkProvider>
   );

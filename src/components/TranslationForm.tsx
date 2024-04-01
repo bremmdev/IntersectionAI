@@ -148,7 +148,7 @@ const TranslationForm = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
+    <div className="flex flex-col md:flex-row gap-4 md:gap-8">
       <div className="basis-1/2">
         <div className="flex flex-col gap-4">
           <h2 className="text-lg text-primary-blue font-medium">
@@ -157,16 +157,20 @@ const TranslationForm = () => {
           <LanguageSelector />
           <div className="textarea-wrapper relative border border-input rounded-lg">
             {translationState.recordingStatus === "stopped" && (
-              <span className="translation-loader absolute z-10 top-2 left-4 text-slate-600">Translating speech...</span>
+              <span className="translation-loader absolute z-10 top-2 left-4 text-slate-600">
+                Translating speech...
+              </span>
             )}
             <Textarea
               aria-label="input text to translate"
               name="input"
-              className="relative min-h-28 focus-visible:outline-none focus:outline-none disabled:cursor-not-allowed pr-10"
+              className="relative min-h-40 focus-visible:outline-none focus:outline-none disabled:cursor-not-allowed pr-10"
               autoFocus
               ref={textAreaRef}
               value={input}
-              disabled={recordingStatus === "recording" || recordingStatus === "stopped"}
+              disabled={
+                recordingStatus === "recording" || recordingStatus === "stopped"
+              }
               onChange={handleTextChange}
             />
             {input.length > 0 && (
@@ -182,8 +186,8 @@ const TranslationForm = () => {
                 />
               </button>
             )}
-            <SpeechRecorder />
           </div>
+          <SpeechRecorder />
         </div>
       </div>
       <div className="basis-1/2 flex flex-col gap-4">

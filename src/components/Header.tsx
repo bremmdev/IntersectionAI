@@ -24,7 +24,7 @@ const userButtonAppearance = {
 
 const Header = () => {
   return (
-    <header className="flex justify-between items-center h-20 sm:px-8 border-b border-slate-300 bg-slate-50">
+    <header className="flex justify-between items-center h-20 px-4 sm:px-8 border-b border-slate-300 bg-slate-50">
       <div className="flex gap-2 items-center">
         <Image
           src="/logo.svg"
