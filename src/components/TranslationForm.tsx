@@ -98,14 +98,14 @@ const TranslationForm = () => {
     } else {
       translationDispatch({
         type: "DETECTED_LANGUAGE_CHANGE",
-        payload: "Detect",
+        payload: "auto",
       });
     }
   }, [debouncedInput, targetLanguage, translateInput, translationDispatch]);
 
   //when 'detect language' is selected, we want to detect the language and translate
   React.useEffect(() => {
-    if (debouncedInput && selectedLanguage === "Detect") {
+    if (debouncedInput && selectedLanguage === "auto") {
       detectLanguageAndTranslate();
     }
   }, [
@@ -117,7 +117,7 @@ const TranslationForm = () => {
 
   //when a language is selected, we want to translate the input
   React.useEffect(() => {
-    if (debouncedInput && selectedLanguage !== "Detect") {
+    if (debouncedInput && selectedLanguage !== "auto") {
       const selectedLanguageCode = languageNameToCode(selectedLanguage);
       const targetLanguageCode = languageNameToCode(
         targetLanguage as TargetLanguageName

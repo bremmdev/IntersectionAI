@@ -7,7 +7,7 @@ import {
 import React from "react";
 
 export const availableLanguages = [
-  { code: "detect", name: "Detect" },
+  { code: "auto", name: "auto" },
   { code: "en", name: "English" },
   { code: "nl", name: "Dutch" },
   { code: "de", name: "German" },
@@ -54,8 +54,8 @@ export type TranslationAction =
 
 const initialState: TranslationState = {
   input: "",
-  selectedLanguage: "Detect",
-  detectedLanguage: "Detect",
+  selectedLanguage: "auto",
+  detectedLanguage: "auto",
   targetLanguage: "English",
   translatedText: "",
   status: "idle",
@@ -74,14 +74,14 @@ function translationReducer(
       return {
         ...state,
         selectedLanguage: action.payload,
-        detectedLanguage: "Detect",
+        detectedLanguage: "auto",
       };
     case "DETECTED_LANGUAGE_CHANGE":
       return { ...state, detectedLanguage: action.payload };
     case "DETECTION_ERROR":
       return {
         ...state,
-        detectedLanguage: "Detect",
+        detectedLanguage: "auto",
         errorMessage: action.payload.message,
         status: "error",
         translatedText: "",
@@ -107,7 +107,7 @@ function translationReducer(
         ...state,
         input: "",
         translatedText: "",
-        detectedLanguage: "Detect",
+        detectedLanguage: "auto",
         errorMessage: "",
         status: "idle",
       };

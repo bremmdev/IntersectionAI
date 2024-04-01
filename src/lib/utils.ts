@@ -15,5 +15,5 @@ export function codeToLanguageName(code: string) {
 }
 
 export function languagesWithoutDetect() {
-  return availableLanguages.filter((lang) => lang.code !== "detect")
+  return availableLanguages.filter((lang) => lang.code !== "auto")
 }

@@ -144,7 +144,7 @@ const SpeechRecorder = () => {
   const showMicButton =
     permission &&
     recordingStatus !== "recording" &&
-    selectedLanguage !== "Detect" &&
+    selectedLanguage !== "auto" &&
     recordingStatus === "idle";
   const isRecording = permission && recordingStatus === "recording";
 

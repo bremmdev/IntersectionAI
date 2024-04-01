@@ -17,7 +17,7 @@ const LanguageSelector = () => {
   const handleLanguageChange = (value: string) => {
     const availableLanguageNames = availableLanguages.map((lang) => lang.name);
     if (
-      value === "Detect" ||
+      value === "auto" ||
       availableLanguageNames.includes(value as LanguageName)
     ) {
       translationDispatch({
@@ -28,7 +28,7 @@ const LanguageSelector = () => {
   };
 
   const detectedLanguageText =
-    detectedLanguage !== "Detect"
+    detectedLanguage !== "auto"
       ? `${detectedLanguage} - detected`
       : "Detect language";
 
@@ -42,7 +42,7 @@ const LanguageSelector = () => {
           {availableLanguages.map((lang) => {
             return (
               <Tabs.Tab key={lang.code} label={lang.name}>
-                {lang.code !== "detect" ? lang.name : detectedLanguageText}
+                {lang.code !== "auto" ? lang.name : detectedLanguageText}
               </Tabs.Tab>
             );
           })}
