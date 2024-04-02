@@ -1,5 +1,6 @@
 import TranslationForm from "@/components/TranslationForm";
 import { auth } from "@clerk/nextjs/server";
+import TranslationHistory from "@/components/TranslationHistory";
 
 export default function Home() {
   const { userId } = auth();
@@ -14,6 +15,7 @@ export default function Home() {
   return (
     <>
       <TranslationForm />
+      <TranslationHistory />
     </>
   );
 }
