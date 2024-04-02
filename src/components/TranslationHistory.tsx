@@ -12,7 +12,7 @@ export async function TranslationHistory() {
   const url =
     process.env.NODE_ENV === "development"
       ? "http://localhost:3001"
-      : process.env.VERCEL_URL;
+      : process.env.PRODUCTION_URL;
 
   const res = await fetch(`${url}/api/translation-history?userId=${userId}`, {
     next: { tags: ["translation-history"] },
