@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "@/context/translation-context";
+import SpeechSynthesis from "./SpeechSynthesis";
 
 import SaveTranslation from "./SaveTranslation";
 
@@ -7,6 +8,7 @@ const TranslationText = () => {
   const [translationState] = useTranslation();
 
   return (
+    <>
     <div
       className={`h-40 rounded-lg px-3 py-2 bg-slate-50 overflow-y-auto relative pr-10`}
     >
@@ -21,7 +23,12 @@ const TranslationText = () => {
           {translationState.errorMessage}
         </span>
       )}
+     
     </div>
+     {translationState.status !== "loading" &&
+        translationState.translatedText && <SpeechSynthesis />}
+      
+    </>
   );
 };
 
