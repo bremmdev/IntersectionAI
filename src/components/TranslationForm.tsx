@@ -55,8 +55,8 @@ const TranslationForm = () => {
   const detectLanguageAndTranslate = React.useCallback(async () => {
     const data = await detectLanguage(debouncedInput);
 
-    //don't translate on error
-    if ("error" in data) {
+    //don't translate on detection error, rate limit errors are handled by the translate function
+    if ("error" in data && !data.error.limitExceeded) {
       translationDispatch({
         type: "DETECTION_ERROR",
         payload: data.error.message,

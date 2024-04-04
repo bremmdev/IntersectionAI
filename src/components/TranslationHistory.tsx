@@ -1,5 +1,5 @@
 import React from "react";
-import { IUser, User } from "../mongodb/models/User";
+import { IUser } from "../mongodb/models/User";
 import { auth } from "@clerk/nextjs/server";
 import { MoveRight, Calendar } from "lucide-react";
 import DeleteTranslation from "./DeleteTranslation";
