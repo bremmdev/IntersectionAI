@@ -12,7 +12,7 @@ import { sanitizeTargetLanguage } from "@/lib/utils";
 const TargetLanguageSelector = () => {
   const searchParams = useSearchParams();
 
-  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"));
 
   const router = useRouter();
 

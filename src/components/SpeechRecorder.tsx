@@ -5,9 +5,7 @@ import { Mic, MicOff, StopCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { transcribe } from "@/_actions/translate";
 import { getWaveBlob } from "@/lib/webmtowav";
-import {
-  useTranslation,
-} from "@/context/translation-context";
+import { useTranslation } from "@/context/translation-context";
 import { toast } from "sonner";
 import { useMounted } from "@/hooks/useMounted";
 import {

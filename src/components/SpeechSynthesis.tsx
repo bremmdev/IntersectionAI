@@ -13,7 +13,7 @@ const SpeechSynthesis = () => {
   const [translationState] = useTranslation();
 
   const searchParams = useSearchParams();
-  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"));
 
   const speakOut = () => {
     //cancel any previous speech synthesis

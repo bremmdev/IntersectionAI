@@ -10,11 +10,13 @@ import {
   availableLanguages,
   availableTargetLanguages,
 } from "@/context/translation-context";
-import {
-  LanguageName,
-} from "@/context/translation-context";
+import { LanguageName } from "@/context/translation-context";
 import { translateText } from "@/_actions/translate";
-import { codeToLanguageName, sanitizeLanguage, sanitizeTargetLanguage } from "@/lib/utils";
+import {
+  codeToLanguageName,
+  sanitizeLanguage,
+  sanitizeTargetLanguage,
+} from "@/lib/utils";
 import TargetLanguageSelector from "./TargetLanguageSelector";
 import TranslationText from "./TranslationText";
 import SpeechRecorder from "./SpeechRecorder";
@@ -27,8 +29,8 @@ const TranslationForm = () => {
 
   const searchParams = useSearchParams();
   const textParam = searchParams.get("text") || "";
-  const selectedLanguage = sanitizeLanguage(searchParams.get("from"))
-  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
+  const selectedLanguage = sanitizeLanguage(searchParams.get("from"));
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"));
 
   const router = useRouter();
 
@@ -104,12 +106,7 @@ const TranslationForm = () => {
         payload: "auto",
       });
     }
-  }, [
-    debouncedInput,
-    targetLanguage,
-    translateInput,
-    translationDispatch,
-  ]);
+  }, [debouncedInput, targetLanguage, translateInput, translationDispatch]);
 
   //when 'detect language' is selected, we want to detect the language and translate
   React.useEffect(() => {
@@ -126,9 +123,7 @@ const TranslationForm = () => {
   //when a language is selected, we want to translate the input
   React.useEffect(() => {
     if (debouncedInput && selectedLanguage !== "auto") {
-   
-        translateInput(debouncedInput, targetLanguage, selectedLanguage);
-      
+      translateInput(debouncedInput, targetLanguage, selectedLanguage);
     }
   }, [debouncedInput, selectedLanguage, targetLanguage, translateInput]);
 
@@ -138,7 +133,7 @@ const TranslationForm = () => {
 
     if (debouncedInput === "") {
       newSearchParams.delete("text");
-      router.push("?" + newSearchParams.toString())
+      router.push("?" + newSearchParams.toString());
       return;
     }
 

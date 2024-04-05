@@ -1,22 +1,21 @@
 "use client";
 
-import React from 'react'
-import { Trash } from 'lucide-react';
-import { deleteTranslation } from '@/_actions/translation-actions';
+import React from "react";
+import { Trash } from "lucide-react";
+import { deleteTranslation } from "@/_actions/translation-actions";
 import { toast } from "sonner";
 
 type Props = {
-  translationId: string
-}
+  translationId: string;
+};
 
-const DeleteTranslation = ({ translationId}: Props) => {
-
+const DeleteTranslation = ({ translationId }: Props) => {
   const handleDeleteTranslation = async () => {
     const response = await deleteTranslation(translationId);
     if (response?.error) {
       toast.error(response.error);
     } else {
-      toast.success('Translation deleted successfully');
+      toast.success("Translation deleted successfully");
     }
   };
 
@@ -28,7 +27,7 @@ const DeleteTranslation = ({ translationId}: Props) => {
     >
       <Trash size={24} />
     </button>
-  )
-}
+  );
+};
 
-export default DeleteTranslation
+export default DeleteTranslation;

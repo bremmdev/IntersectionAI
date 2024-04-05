@@ -12,33 +12,36 @@ import { useAuth } from "@clerk/nextjs";
 import { useTranslation, LanguageName } from "@/context/translation-context";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
-import { codeToLanguageName, sanitizeLanguage, sanitizeTargetLanguage } from "@/lib/utils";
+import {
+  codeToLanguageName,
+  sanitizeLanguage,
+  sanitizeTargetLanguage,
+} from "@/lib/utils";
 
 const SaveTranslation = () => {
   const [translationState] = useTranslation();
   const searchParams = useSearchParams();
 
-  const selectedLanguage = sanitizeLanguage(searchParams.get("from"))
-  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
+  const selectedLanguage = sanitizeLanguage(searchParams.get("from"));
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"));
 
   const { userId } = useAuth();
   if (!userId) return null;
 
-  const {
-    input,
-    translatedText,
-    detectedLanguage,
-  } = translationState;
+  const { input, translatedText, detectedLanguage } = translationState;
 
   const handleSaveTranslation = async () => {
     const translationData = {
-      from: selectedLanguage === "auto" ? detectedLanguage : codeToLanguageName(selectedLanguage) as LanguageName,
+      from:
+        selectedLanguage === "auto"
+          ? detectedLanguage
+          : (codeToLanguageName(selectedLanguage) as LanguageName),
       fromText: input,
       to: codeToLanguageName(targetLanguage) as LanguageName,
       toText: translatedText,
     };
 
-    const response = await saveTranslation(translationData)
+    const response = await saveTranslation(translationData);
     if (response?.error) {
       toast.error(response.error);
     } else {

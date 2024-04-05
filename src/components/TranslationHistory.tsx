@@ -53,9 +53,7 @@ export async function TranslationHistory() {
                   <p className="mb-2">{translation.fromText}</p>
                   <p className="italic">{translation.toText}</p>
                 </div>
-                <DeleteTranslation
-                  translationId={translation._id}
-                />
+                <DeleteTranslation translationId={translation._id} />
               </div>
             </li>
           ))}

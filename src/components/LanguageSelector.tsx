@@ -8,15 +8,19 @@ import {
   useTranslation,
 } from "@/context/translation-context";
 import { useSearchParams, useRouter } from "next/navigation";
-import { languageNameToCode, codeToLanguageName, sanitizeLanguage } from "@/lib/utils";
+import {
+  languageNameToCode,
+  codeToLanguageName,
+  sanitizeLanguage,
+} from "@/lib/utils";
 
 const LanguageSelector = () => {
   const [translationState] = useTranslation();
 
   const { detectedLanguage } = translationState;
   const searchParams = useSearchParams();
-  
-  const selectedLanguage = sanitizeLanguage(searchParams.get("from"))
+
+  const selectedLanguage = sanitizeLanguage(searchParams.get("from"));
 
   const router = useRouter();
 
