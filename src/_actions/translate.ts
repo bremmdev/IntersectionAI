@@ -28,9 +28,9 @@ import { checkRateLimit } from "@/lib/limit";
 import { auth } from "@clerk/nextjs/server";
 
 const languageToFullCode = (name: string) => {
-  if (name === "Dutch") return "nl-NL";
-  if (name === "German") return "de-DE";
-  if (name === "English") return "en-US";
+  if (name === "nl") return "nl-NL";
+  if (name === "de") return "de-DE";
+  if (name === "en") return "en-US";
   return "invalid language";
 };
 

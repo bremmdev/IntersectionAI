@@ -5,7 +5,9 @@ import { Mic, MicOff, StopCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { transcribe } from "@/_actions/translate";
 import { getWaveBlob } from "@/lib/webmtowav";
-import { useTranslation } from "@/context/translation-context";
+import {
+  useTranslation,
+} from "@/context/translation-context";
 import { toast } from "sonner";
 import { useMounted } from "@/hooks/useMounted";
 import {
@@ -13,6 +15,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSearchParams } from "next/navigation";
+import { codeToLanguageName, sanitizeLanguage } from "@/lib/utils";
 
 const TOTAL_RECORDING_TIME = 30;
 
@@ -25,7 +29,11 @@ const SpeechRecorder = () => {
 
   const mounted = useMounted();
 
-  const { selectedLanguage, recordingStatus } = translationState;
+  const searchParams = useSearchParams();
+
+  const selectedLanguage = sanitizeLanguage(searchParams.get("from"));
+
+  const { recordingStatus } = translationState;
 
   const [stream, setStream] = React.useState<MediaStream | null>(null);
   const mediaRecorder = React.useRef<MediaRecorder | null>(null);

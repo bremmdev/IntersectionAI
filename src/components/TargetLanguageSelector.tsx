@@ -1,30 +1,33 @@
 import React from "react";
 
 import { Tabs } from "./ui/Tabs";
-import { useTranslation } from "@/context/translation-context";
-import type {
-  LanguageName, TargetLanguageName,
-} from "@/context/translation-context";
-import { languagesWithoutDetect } from "@/lib/utils";
+import {
+  languagesWithoutDetect,
+  languageNameToCode,
+  codeToLanguageName,
+} from "@/lib/utils";
+import { useSearchParams, useRouter } from "next/navigation";
+import { sanitizeTargetLanguage } from "@/lib/utils";
 
 const TargetLanguageSelector = () => {
-  const [translationState, translationDispatch] = useTranslation();
+  const searchParams = useSearchParams();
 
-  const { targetLanguage } = translationState;
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
+
+  const router = useRouter();
 
   const languages = React.useMemo(() => languagesWithoutDetect(), []);
 
   const handleLanguageChange = (value: string) => {
-    translationDispatch({
-      type: "TARGET_LANGUAGE_CHANGE",
-      payload: value as TargetLanguageName,
-    });
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("to", languageNameToCode(value) || "en");
+    router.push("?" + newSearchParams.toString());
   };
 
   return (
     <div>
       <Tabs.Root
-        value={targetLanguage as LanguageName}
+        value={codeToLanguageName(targetLanguage)}
         onValueChange={handleLanguageChange}
       >
         <Tabs.List aria-label="target language selector">

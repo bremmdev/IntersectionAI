@@ -11,29 +11,34 @@ import { saveTranslation } from "@/_actions/translation-actions";
 import { useAuth } from "@clerk/nextjs";
 import { useTranslation, LanguageName } from "@/context/translation-context";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
+import { codeToLanguageName, sanitizeLanguage, sanitizeTargetLanguage } from "@/lib/utils";
 
 const SaveTranslation = () => {
   const [translationState] = useTranslation();
+  const searchParams = useSearchParams();
+
+  const selectedLanguage = sanitizeLanguage(searchParams.get("from"))
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
+
   const { userId } = useAuth();
   if (!userId) return null;
 
   const {
     input,
     translatedText,
-    selectedLanguage,
     detectedLanguage,
-    targetLanguage,
   } = translationState;
 
   const handleSaveTranslation = async () => {
     const translationData = {
-      from: selectedLanguage === "auto" ? detectedLanguage : selectedLanguage,
+      from: selectedLanguage === "auto" ? detectedLanguage : codeToLanguageName(selectedLanguage) as LanguageName,
       fromText: input,
-      to: targetLanguage,
+      to: codeToLanguageName(targetLanguage) as LanguageName,
       toText: translatedText,
     };
 
-    const response = await saveTranslation(translationData);
+    const response = await saveTranslation(translationData)
     if (response?.error) {
       toast.error(response.error);
     } else {

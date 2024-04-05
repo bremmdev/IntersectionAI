@@ -13,6 +13,8 @@ export const availableLanguages = [
   { code: "de", name: "German" },
 ] as const;
 
+export const availableLanguageCodes = ["nl", "de", "en"]
+
 export const availableTargetLanguages = [
   { code: "en", name: "English" },
   { code: "nl", name: "Dutch" },
@@ -30,9 +32,7 @@ type RecordingStatus = "idle" | "recording" | "stopped";
 
 export type TranslationState = {
   input: string;
-  selectedLanguage: LanguageName;
   detectedLanguage: LanguageName;
-  targetLanguage: TargetLanguageName;
   translatedText: string;
   status: STATUS;
   errorMessage: string;
@@ -41,10 +41,8 @@ export type TranslationState = {
 
 export type TranslationAction =
   | { type: "INPUT_CHANGE"; payload: string }
-  | { type: "SELECTED_LANGUAGE_CHANGE"; payload: LanguageName }
   | { type: "DETECTED_LANGUAGE_CHANGE"; payload: LanguageName }
   | { type: "DETECTION_ERROR"; payload: { message: string } }
-  | { type: "TARGET_LANGUAGE_CHANGE"; payload: TargetLanguageName }
   | { type: "TRANSLATION_START" }
   | { type: "TRANSLATION_DONE"; payload: TranslateResponse }
   | { type: "INPUT_CLEAR" }
@@ -54,9 +52,7 @@ export type TranslationAction =
 
 const initialState: TranslationState = {
   input: "",
-  selectedLanguage: "auto",
   detectedLanguage: "auto",
-  targetLanguage: "English",
   translatedText: "",
   status: "idle",
   errorMessage: "",
@@ -70,12 +66,6 @@ function translationReducer(
   switch (action.type) {
     case "INPUT_CHANGE":
       return { ...state, input: action.payload };
-    case "SELECTED_LANGUAGE_CHANGE":
-      return {
-        ...state,
-        selectedLanguage: action.payload,
-        detectedLanguage: "auto",
-      };
     case "DETECTED_LANGUAGE_CHANGE":
       return { ...state, detectedLanguage: action.payload };
     case "DETECTION_ERROR":
@@ -86,8 +76,6 @@ function translationReducer(
         status: "error",
         translatedText: "",
       };
-    case "TARGET_LANGUAGE_CHANGE":
-      return { ...state, targetLanguage: action.payload };
     case "TRANSLATION_START":
       return { ...state, status: "loading", errorMessage: "" };
     case "TRANSLATION_DONE":

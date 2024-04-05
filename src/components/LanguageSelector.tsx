@@ -2,29 +2,28 @@
 
 import React from "react";
 import { Tabs } from "./ui/Tabs";
-import type { LanguageName } from "@/context/translation-context";
 
 import {
   availableLanguages,
   useTranslation,
 } from "@/context/translation-context";
+import { useSearchParams, useRouter } from "next/navigation";
+import { languageNameToCode, codeToLanguageName, sanitizeLanguage } from "@/lib/utils";
 
 const LanguageSelector = () => {
-  const [translationState, translationDispatch] = useTranslation();
+  const [translationState] = useTranslation();
 
-  const { detectedLanguage, selectedLanguage } = translationState;
+  const { detectedLanguage } = translationState;
+  const searchParams = useSearchParams();
+  
+  const selectedLanguage = sanitizeLanguage(searchParams.get("from"))
+
+  const router = useRouter();
 
   const handleLanguageChange = (value: string) => {
-    const availableLanguageNames = availableLanguages.map((lang) => lang.name);
-    if (
-      value === "auto" ||
-      availableLanguageNames.includes(value as LanguageName)
-    ) {
-      translationDispatch({
-        type: "SELECTED_LANGUAGE_CHANGE",
-        payload: value as LanguageName,
-      });
-    }
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("from", languageNameToCode(value) || "auto");
+    router.push("?" + newSearchParams.toString());
   };
 
   const detectedLanguageText =
@@ -35,7 +34,7 @@ const LanguageSelector = () => {
   return (
     <div>
       <Tabs.Root
-        value={selectedLanguage}
+        value={codeToLanguageName(selectedLanguage)}
         onValueChange={(value) => handleLanguageChange(value)}
       >
         <Tabs.List aria-label="translation language selector">

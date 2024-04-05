@@ -10,23 +10,29 @@ import {
   availableLanguages,
   availableTargetLanguages,
 } from "@/context/translation-context";
-import type {
+import {
   LanguageName,
-  TargetLanguageName,
 } from "@/context/translation-context";
 import { translateText } from "@/_actions/translate";
-import { codeToLanguageName, languageNameToCode } from "@/lib/utils";
+import { codeToLanguageName, sanitizeLanguage, sanitizeTargetLanguage } from "@/lib/utils";
 import TargetLanguageSelector from "./TargetLanguageSelector";
 import TranslationText from "./TranslationText";
 import SpeechRecorder from "./SpeechRecorder";
 import { X as DeleteTextIcon } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const TranslationForm = () => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   const [translationState, translationDispatch] = useTranslation();
 
-  const { input, selectedLanguage, targetLanguage, recordingStatus } =
-    translationState;
+  const searchParams = useSearchParams();
+  const textParam = searchParams.get("text") || "";
+  const selectedLanguage = sanitizeLanguage(searchParams.get("from"))
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
+
+  const router = useRouter();
+
+  const { input, recordingStatus } = translationState;
 
   const debouncedInput = useDebounce(input, 200);
 
@@ -86,10 +92,7 @@ const TranslationForm = () => {
     if (availableLanguageCode.includes(data[0].language)) {
       const detectedLanguage = codeToLanguageName(data[0].language);
 
-      translateInput(
-        debouncedInput,
-        languageNameToCode(targetLanguage as TargetLanguageName) as string
-      );
+      translateInput(debouncedInput, targetLanguage);
 
       translationDispatch({
         type: "DETECTED_LANGUAGE_CHANGE",
@@ -101,7 +104,12 @@ const TranslationForm = () => {
         payload: "auto",
       });
     }
-  }, [debouncedInput, targetLanguage, translateInput, translationDispatch]);
+  }, [
+    debouncedInput,
+    targetLanguage,
+    translateInput,
+    translationDispatch,
+  ]);
 
   //when 'detect language' is selected, we want to detect the language and translate
   React.useEffect(() => {
@@ -111,30 +119,53 @@ const TranslationForm = () => {
   }, [
     debouncedInput,
     selectedLanguage,
-    detectLanguageAndTranslate,
     targetLanguage,
+    detectLanguageAndTranslate,
   ]);
 
   //when a language is selected, we want to translate the input
   React.useEffect(() => {
     if (debouncedInput && selectedLanguage !== "auto") {
-      const selectedLanguageCode = languageNameToCode(selectedLanguage);
-      const targetLanguageCode = languageNameToCode(
-        targetLanguage as TargetLanguageName
-      );
-      if (selectedLanguageCode && targetLanguage) {
-        translateInput(
-          debouncedInput,
-          targetLanguageCode as string,
-          selectedLanguageCode
-        );
-      }
+   
+        translateInput(debouncedInput, targetLanguage, selectedLanguage);
+      
     }
   }, [debouncedInput, selectedLanguage, targetLanguage, translateInput]);
+
+  // update url with text after debouncing
+  React.useEffect(() => {
+    const newSearchParams = new URLSearchParams(searchParams);
+
+    if (debouncedInput === "") {
+      newSearchParams.delete("text");
+      router.push("?" + newSearchParams.toString())
+      return;
+    }
+
+    // Only update if values have changed
+    if (textParam !== debouncedInput && debouncedInput !== "") {
+      newSearchParams.set("text", debouncedInput);
+      router.push("?" + newSearchParams.toString());
+    }
+  }, [debouncedInput, searchParams, translationDispatch, textParam, router]);
+
+  // set initial state from url
+  React.useEffect(() => {
+    if (textParam) {
+      translationDispatch({
+        type: "INPUT_CHANGE",
+        payload: textParam,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     if (value === "") {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set("text", "");
+      router.push("?" + newSearchParams.toString());
       translationDispatch({ type: "INPUT_CLEAR" });
       return;
     }
@@ -143,6 +174,9 @@ const TranslationForm = () => {
   };
 
   const handleClearInput = () => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set("text", "");
+    router.push("?" + newSearchParams.toString());
     translationDispatch({ type: "INPUT_CLEAR" });
     textAreaRef.current?.focus();
   };

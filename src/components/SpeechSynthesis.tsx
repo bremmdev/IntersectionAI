@@ -6,10 +6,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTranslation } from "@/context/translation-context";
-import { languageNameToCode } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
+import { sanitizeTargetLanguage } from "@/lib/utils";
 
 const SpeechSynthesis = () => {
   const [translationState] = useTranslation();
+
+  const searchParams = useSearchParams();
+  const targetLanguage = sanitizeTargetLanguage(searchParams.get("to"))
 
   const speakOut = () => {
     //cancel any previous speech synthesis
@@ -18,10 +22,7 @@ const SpeechSynthesis = () => {
       translationState.translatedText
     );
 
-    const languageCode = languageNameToCode(translationState.targetLanguage);
-    if (!languageCode) return;
-
-    utterance.lang = languageCode;
+    utterance.lang = targetLanguage;
     speechSynthesis.speak(utterance);
   };
 
