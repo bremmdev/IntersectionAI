@@ -19,8 +19,7 @@ export async function purgeRateLimit(
 }
 
 app.timer("purgeRateLimit", {
-  // schedule: '0 0 * * * *',
-  //schedule every minute
-  schedule: "0 * * * * *",
+  //every hour
+  schedule: "0 0 * * * *",
   handler: purgeRateLimit,
 });
