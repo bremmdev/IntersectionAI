@@ -15,7 +15,7 @@ import {
 } from "@/lib/utils";
 
 const LanguageSelector = () => {
-  const [translationState] = useTranslation();
+  const [translationState, translationDispatch] = useTranslation();
 
   const { detectedLanguage } = translationState;
   const searchParams = useSearchParams();
@@ -25,6 +25,7 @@ const LanguageSelector = () => {
   const router = useRouter();
 
   const handleLanguageChange = (value: string) => {
+    translationDispatch({ type: "DETECTED_LANGUAGE_CHANGE", payload: "auto" });
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("from", languageNameToCode(value) || "auto");
     router.push("?" + newSearchParams.toString());
